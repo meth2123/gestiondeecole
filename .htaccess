@@ -10,13 +10,11 @@ RewriteRule ^(.*)$ https://%1/$1 [R=301,L]
 
 # Protection des fichiers sensibles
 <FilesMatch "^\.">
-    Order allow,deny
-    Deny from all
+    Require all denied
 </FilesMatch>
 
 <FilesMatch "(^#.*#|\.(bak|config|dist|fla|inc|ini|log|psd|sh|sql|sw[op])|~)$">
-    Order allow,deny
-    Deny from all
+    Require all denied
 </FilesMatch>
 
 # Protection du dossier service

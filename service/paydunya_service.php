@@ -13,17 +13,48 @@ if (file_exists(__DIR__ . '/../vendor/autoload.php')) {
 }
 
 class PayDunyaService {
-    private $config;
-    private $sdk;
     private $db;
+    private $config;
+    private $urls;
+    private $headers;
+    private $store;
+    private $sdk;
 
     public function __construct($db) {
         $this->db = $db;
-        $this->config = require __DIR__ . '/paydunya_env.php';
+        
+        // Charger la configuration
+        $this->urls = getPayDunyaUrls();
+        $this->headers = getPayDunyaHeaders();
+        $this->store = getPayDunyaStore();
+        
+        // Préparer la configuration pour le SDK
+        $this->config = [
+            'mode' => getPayDunyaMode(),
+            'master_key' => $this->headers[0] ? explode(': ', $this->headers[0])[1] : '',
+            'public_key' => $this->headers[1] ? explode(': ', $this->headers[1])[1] : '',
+            'private_key' => $this->headers[2] ? explode(': ', $this->headers[2])[1] : '',
+            'token' => $this->headers[3] ? explode(': ', $this->headers[3])[1] : '',
+            'store' => array_merge($this->store, [
+                'callback_url' => $this->urls['callback_url'],
+                'cancel_url' => $this->urls['cancel_url'],
+                'return_url' => $this->urls['return_url']
+            ]),
+            'subscription' => [
+                'amount' => 15000,
+                'description' => 'Abonnement mensuel SchoolManager'
+            ],
+            'payment_methods' => [
+                'orange-money-senegal' => true,
+                'wave-senegal' => true,
+                'free-money-senegal' => true
+            ]
+        ];
+
         $this->sdk = new PayDunyaSDK($this->config);
         
         error_log("PayDunya Service initialisé - Environnement: " . ($this->config['mode'] === 'test' ? 'Test' : 'Production'));
-        error_log("Base URL: " . $this->config['store']['website_url']);
+        error_log("Base URL: " . ($this->store['website_url'] ?? 'Non définie'));
     }
 
     public function getMode() {
@@ -32,19 +63,27 @@ class PayDunyaService {
 
     public function createPayment($subscription) {
         try {
+            // Vérifier que la configuration d'abonnement existe
+            if (!isset($this->config['subscription'])) {
+                throw new Exception("Configuration d'abonnement manquante");
+            }
+
+            $amount = $this->config['subscription']['amount'];
+            $description = $this->config['subscription']['description'];
+
             // Préparer les données de la facture
             $invoice_data = [
                 'items' => [
                     [
                         'name' => 'Abonnement SchoolManager',
                         'quantity' => 1,
-                        'unit_price' => $this->config['subscription']['amount'],
-                        'total_price' => $this->config['subscription']['amount'],
-                        'description' => $this->config['subscription']['description']
+                        'unit_price' => $amount,
+                        'total_price' => $amount,
+                        'description' => $description
                     ]
                 ],
-                'total_amount' => $this->config['subscription']['amount'],
-                'description' => $this->config['subscription']['description'],
+                'total_amount' => $amount,
+                'description' => $description,
                 'custom_data' => [
                     'subscription_id' => $subscription['id'],
                     'school_name' => $subscription['school_name'],

@@ -1,6 +1,6 @@
 <?php
-require_once '../../service/paydunya_service.php';
 require_once '../../service/paydunya_env.php';
+require_once '../../service/paydunya_service.php';
 require_once '../../service/db_utils.php';
 
 $error_message = '';
