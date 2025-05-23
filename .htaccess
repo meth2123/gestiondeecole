@@ -1,12 +1,12 @@
 RewriteEngine On
 
-# Forcer HTTPS
-RewriteCond %{HTTPS} off
-RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+# ⚠️ Supprimé : Forçage de HTTPS (Render le fait déjà automatiquement)
+# RewriteCond %{HTTPS} off
+# RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
-# Rediriger www vers non-www
-RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
-RewriteRule ^(.*)$ https://%1/$1 [R=301,L]
+# ⚠️ Supprimé : Redirection www vers non-www (à gérer au niveau DNS ou Render si nécessaire)
+# RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
+# RewriteRule ^(.*)$ https://%1/$1 [R=301,L]
 
 # Protection des fichiers sensibles
 <FilesMatch "^\.">
