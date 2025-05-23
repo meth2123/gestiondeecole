@@ -4,22 +4,11 @@ services:
     env: docker
     region: oregon
     plan: starter
-    dockerfilePath: ./Dockerfile
     envVars:
-      - key: APP_URL
-        value: https://schoolmanager.sn
       - key: APP_ENV
         value: production
       - key: APP_DEBUG
         value: false
-      - key: PAYDUNYA_MASTER_KEY
-        sync: false
-      - key: PAYDUNYA_PUBLIC_KEY
-        sync: false
-      - key: PAYDUNYA_PRIVATE_KEY
-        sync: false
-      - key: PAYDUNYA_TOKEN
-        sync: false
       - key: DB_HOST
         fromDatabase:
           name: schoolmanager-db
@@ -36,6 +25,7 @@ services:
         fromDatabase:
           name: schoolmanager-db
           property: password
+    healthCheckPath: /health.php
     autoDeploy: true
 
   - type: mysql
