@@ -3,11 +3,30 @@
  * Utilitaires pour la migration de mysql vers mysqli
  */
 
+// Récupérer les variables d'environnement de Render
+$db_host = getenv('RENDER_DB_HOST') ?: 'localhost';
+$db_user = getenv('RENDER_DB_USER') ?: 'root';
+$db_pass = getenv('RENDER_DB_PASSWORD') ?: '';
+$db_name = getenv('RENDER_DB_NAME') ?: 'gestion';
+
+// Log des informations de connexion (sans le mot de passe)
+error_log("Tentative de connexion à la base de données - Host: $db_host, User: $db_user, DB: $db_name");
+
 // Connexion à la base de données
-$link = mysqli_connect('localhost', 'root', '', 'gestion');
+$link = mysqli_connect($db_host, $db_user, $db_pass, $db_name);
 
 if (!$link) {
-    die("Erreur de connexion : " . mysqli_connect_error());
+    error_log("Erreur de connexion à la base de données : " . mysqli_connect_error());
+    error_log("Détails de la connexion - Host: $db_host, User: $db_user, DB: $db_name");
+    
+    // En production, afficher un message générique
+    if (getenv('RENDER_ENVIRONMENT') === 'production') {
+        die("Erreur de connexion à la base de données. Veuillez contacter l'administrateur.");
+    } else {
+        // En développement, afficher plus de détails
+        die("Erreur de connexion à la base de données : " . mysqli_connect_error() . 
+            "\nHost: $db_host\nUser: $db_user\nDB: $db_name");
+    }
 }
 
 // Définir le jeu de caractères
