@@ -26,7 +26,7 @@ if (empty($myid) || empty($mypassword)) {
 
 try {
     // Récupérer le mot de passe stocké et le type d'utilisateur
-    $sql = "SELECT usertype, password, status FROM users WHERE userid = ?";
+    $sql = "SELECT usertype, password FROM users WHERE userid = ?";
     $stmt = $link->prepare($sql);
     
     if (!$stmt) {
@@ -45,13 +45,6 @@ try {
         $row = $result->fetch_assoc();
         $stored_password = $row['password'];
         $control = $row['usertype'];
-        $status = $row['status'];
-        
-        // Vérifier si le compte est actif
-        if ($status !== 'active') {
-            header('Location: ../index.php?error=inactive_account');
-            exit;
-        }
         
         // Vérifier le mot de passe
         if (password_verify($mypassword, $stored_password)) {
@@ -65,7 +58,6 @@ try {
                 'admin' => '../module/admin',
                 'teacher' => '../module/teacher',
                 'student' => '../module/student',
-                'staff' => '../module/staff',
                 'parent' => '../module/parent'
             ];
             
